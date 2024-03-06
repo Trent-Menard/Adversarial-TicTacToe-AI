@@ -69,6 +69,7 @@ while human_is_starting_player is None:
     elif user_input.isalpha() and user_input.upper() == "N":
         human_is_starting_player = False
         print("Waiting for AI's choice.")
+
     else:
         print("[Error]: Invalid choice.")
     print()
@@ -111,13 +112,44 @@ def is_game_over(state):
     return test_player_win(state, HUMAN) or test_player_win(state, COMPUTER)
 
 
+# Places the X/O onto the board if it's a valid move.
+def place_move(x, y, player):
+    if is_valid_move(x, y):
+        game_board[x][y] = player
+        return True
+    else:
+        return False
+
+
+# Simulates the current game board state. +1 for COMPUTER win, -1 for HUMAN win, 0 for draw.
+def run_simulation(state):
+    if test_player_win(state, COMPUTER):
+        score = +1
+    elif test_player_win(state, HUMAN):
+        score = -1
+    else:
+        score = 0
+
+    return score
+
+
+def minimax(state, depth, player):
+    if player == COMPUTER:
+        best = [-1, -1, -math.inf]
+    else:
+        best = [-1, -1, +math.inf]
+
+    if depth == 0 or is_game_over(state):
+        score = run_simulation(state)
+        return [-1, -1, score]
+
+    # todo: Finish implementation. Why [-1, -1, ...]?
+
+
 def ai_turn(computers_choice, humans_choice):
     depth = len(get_empty_cells(game_board))
     if depth == 0 or is_game_over(game_board):
         return
-
-    print(f"AI chose: {computers_choice}")
-    display_board()
 
     if depth == 9:
         x = choice([0, 1, 2])
@@ -126,12 +158,22 @@ def ai_turn(computers_choice, humans_choice):
         move = minimax(game_board, depth, COMPUTER)
         x, y = move[0], move[1]
 
+    place_move(x, y, COMPUTER)
+
+
 # Continue game until completion (Draw, Win, Loss).
-# while len(get_empty_cells(game_board)) > 0 and not is_game_over(game_board):
-#     choice = input('Choose a location (top left is 1; bottom right is 9): ')
-#     if choice.isdigit() and 1 <= int(choice) <= 9:
-#         print("Good.")
-#         if not human_is_starting_player:
-#
-#     else:
-#         print("[Error]: Invalid choice.")
+while len(get_empty_cells(game_board)) > 0 and not is_game_over(game_board):
+    if not human_is_starting_player:
+        ai_turn(computers_character, humans_character)
+
+    display_board()
+
+    # todo: Human choice implementation
+    user_input = input('Choose a location (top left is 1; bottom right is 9): ')
+    if user_input.isdigit() and 1 <= int(user_input) <= 9:
+        print("Good.")
+
+    else:
+        print("[Error]: Invalid choice.")
+
+    ai_turn(computers_character, humans_character)
